@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Outputs
+outputs/*.csv
+outputs/*.png
+outputs/plots/*
+
+# Virtual environments
+.venv/
+env/
+
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# VS Code settings (optional)
+.vscode/
