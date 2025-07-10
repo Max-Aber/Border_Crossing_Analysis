@@ -4,10 +4,7 @@ This project uses information from the Bereau of Transportation Statistics to se
 
 ## Data
 
-- Source: [Bureau of Transportation Statistics](https://www.bts.gov/explore-topics-and-geography/geography/border-crossingentry-data)
-  [US Border Crossings Dataset](https://catalog.data.gov/dataset/border-crossing-entry-data-683ae)
-- Range: Jan 1996 – May 2024
-- Fields: Port, State, Border, Date, Measure, Value, Location
+Data from [Bureau of Transportation Statistics](https://www.bts.gov/explore-topics-and-geography/geography/border-crossingentry-data) ([US Border Crossings Dataset](https://catalog.data.gov/dataset/border-crossing-entry-data-683ae)) for inbound crossings into the U.S-Canada and the U.S.-Mexico border at the port level. Data shows the numbers for vehicles, containers, passengers, or pedestrians entering the United States. The data ranges from Jan 1996 to May 2024.
 
 ## Tools
 
