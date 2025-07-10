@@ -6,6 +6,15 @@ This project uses information from the Bereau of Transportation Statistics to se
 
 Data from [Bureau of Transportation Statistics](https://www.bts.gov/explore-topics-and-geography/geography/border-crossingentry-data) ([US Border Crossings Dataset](https://catalog.data.gov/dataset/border-crossing-entry-data-683ae)) for inbound crossings into the U.S-Canada and the U.S.-Mexico border at the port level. Data shows the numbers for vehicles, containers, passengers, or pedestrians entering the United States. The data ranges from Jan 1996 to May 2024.
 
+## Goals
+
+This project has as a goal to analyze the following:
+
+- The total trends over time, upwards, downwards?
+- How major events in the United States and the world have impacted the amount of crossings.
+- What is the seasonal patterns seen in the borders, and why this might be.
+- Which ports have the most traffic, where are they located, and why are they the busiest?
+
 ## Tools
 
 - Python (pandas, matplotlib)
@@ -13,9 +22,7 @@ Data from [Bureau of Transportation Statistics](https://www.bts.gov/explore-topi
 
 ## Key Findings
 
-- [x] Sharp decline during COVID-19
-- [x] Surge in crossings post-2021
-- [x] Seasonal patterns observed annually
+- TBF
 
 ## How to Run
 
