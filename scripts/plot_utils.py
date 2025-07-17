@@ -12,12 +12,14 @@ def plot_graph(x, y, title, xlabel, ylabel):
     - ylabel: The label for the y-axis.
     """
     
-    plt.figure(figsize=(25, 15))
+    plt.figure(figsize=(25, 5))
     plt.plot(x, y)
     
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x/1e6:.1f}M'))
     
     plt.grid(True)
     
