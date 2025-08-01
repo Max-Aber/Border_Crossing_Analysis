@@ -1,0 +1,128 @@
+1. Project Structure
+
+Border_Crossing_Metrics/
+├── data/
+│   ├── raw/                               # Original, untouched data
+│   │   └── Border_Crossing_Data.csv
+│   ├── processed/                         # Cleaned and prepared datasets
+│   │   ├── border_crossings_cleaned.csv   # Fully cleaned main dataset
+│   │   ├── monthly_crossings.csv          # Aggregated monthly data for total trends
+│   │   ├── seasonal_crossings.csv         # Data grouped by season (Winter/Spring/Summer/Fall)
+│   │   ├── measure_crossings.csv          # Aggregated monthly by crossing type
+│   │   ├── border_region_crossings.csv    # Aggregated monthly by US-MX/US-CAN border
+│   │   └── top_ports_crossings_2000s.csv  # Total Crossings by ports since Jan 2000
+│   └── data_description.md                # Describe datasets clearly
+│
+├── scripts/                               # Reusable, modular code
+│   ├── clean_data.py                      # Data cleaning functions (from raw to cleaned data)
+│   ├── aggregate_data.py                  # Functions to create each aggregated dataset
+│   └── plot_utils.py                      # Generic plotting utilities
+│
+├── notebooks/                             # Clearly structured analyses
+│   ├── 0-data_cleaning.ipynb              # From raw → cleaned dataset (calls clean_data.py)
+│   ├── 1-total_trends_over_time.ipynb     # Long-term trends analysis
+│   ├── 2-events_impact_analysis.ipynb     # Impact of Trump, COVID-19, Biden
+│   ├── 3-seasonality_analysis.ipynb       # Seasonal crossing patterns
+│   ├── 4-crossing_types_analysis.ipynb    # Crossing types analysis
+│   ├── 5-border_region_comparison.ipynb   # Mexico vs Canada borders
+│   ├── 6-top_ports_analysis.ipynb         # Analysis for busiest ports
+│   ├── 7-covid_recovery_analysis.ipynb    # Optional comparison to external air-travel data
+│   └── final_report_dashboard.ipynb       # Notebook presenting final conclusions (storytelling notebook)
+│
+├── outputs/                               # All outputs clearly separated
+│   ├── plots/                             # Graphs for each analysis
+│   │   ├── total_trends/                  # Graphs from notebook 1
+│   │   ├── event_impacts/                 # Graphs from notebook 2
+│   │   ├── seasonal_patterns/             # Graphs from notebook 3
+│   │   ├── crossing_types/                # Graphs from notebook 4
+│   │   ├── border_comparison/             # Graphs from notebook 5
+│   │   ├── top_ports/                     # Graphs from notebook 6
+│   │   └── covid_recovery/                # Graphs from notebook 7
+│   └── reports/                           # Final conclusions and reports (PDFs, Markdown)
+│       ├── total_trends_summary.md
+│       ├── events_impact_summary.md
+│       ├── seasonality_summary.md
+│       ├── crossing_types_summary.md
+│       ├── border_comparison_summary.md
+│       ├── top_ports_summary.md
+│       └── covid_recovery_summary.md
+│
+├── references/                            # External references/data (like air travel data)
+│
+├── presentation/                          # Slides or PDFs for presentation
+│   └── border_crossing_presentation.pdf
+│
+├── README.md                              # Clear, professional documentation
+└── requirements.txt                       # Libraries for reproducibility
+
+2. Datasets That Need to Generated (and Why)
+To streamline your analysis clearly, create the following CSV files from the raw data:
+
+border_crossings_cleaned.csv (from clean_data.py)
+Reason: Basis for all subsequent datasets, removes unnecessary columns (Lat, Lon, Point).
+
+monthly_crossings.csv (monthly aggregation)
+Reason: Enables efficient, repeated analyses for total trends and event impacts.
+
+event_period_crossings.csv (monthly aggregation, marked by presidency & COVID periods)
+Reason: Quick filtering and plotting of specific event timelines.
+
+seasonal_crossings.csv (aggregated average per calendar month)
+Reason: Fast plotting and checking seasonality at a glance.
+
+measure_crossings.csv (aggregated by crossing type monthly)
+Reason: Simplifies type-based comparison and plotting.
+
+border_region_crossings.csv (monthly data split by US-Mexico vs US-Canada)
+Reason: Instant regional comparison, visualization-ready.
+
+top_ports_crossings.csv (monthly aggregation for only the top 5 ports)
+Reason: Targeted detailed analysis without re-filtering each time.
+
+
+3. Recommended Workflow and Order
+Step-by-step professional workflow:
+
+Data Cleaning (0-data_cleaning.ipynb)
+
+Load raw data, clean it, create border_crossings_cleaned.csv
+
+Data Aggregation (aggregate_data.py script or notebooks 1–6 separately)
+
+Generate aggregated datasets listed above from the cleaned data.
+
+Analytical Notebooks (1–6-*.ipynb)
+
+Each notebook reads only its relevant aggregated CSV.
+
+Perform specific analyses, clearly label steps, and save outputs (plots).
+
+Insights and Reports
+
+Store each notebook’s key insights (conclusions) separately in markdown files (outputs/reports/).
+
+Final Dashboard Notebook
+
+Concisely combines major findings, charts, and conclusions into a storytelling notebook (final_report_dashboard.ipynb).
+
+Presentation
+
+Summarize all findings clearly in slides/PDF (presentation/).
+
+
+4. How and Where to Store Conclusions and Graphs Clearly
+Intermediate Graphs (initial analysis):
+Store in outputs/plots/<specific_goal_folder>/
+
+Finalized Graphs and Conclusions (presentation-ready):
+Store in your final dashboard notebook and presentations folder.
+
+Written Conclusions (clear and professional):
+Stored in outputs/reports/ as separate Markdown files. This makes them easy to reference, share, and maintain clearly.
+
+Professional Challenges:
+Avoid redundancy: Your original setup had fewer explicit CSV files, potentially forcing repeated filtering or grouping in different notebooks. Pre-aggregating CSVs as shown above ensures efficiency.
+
+Granularity and reusability: Clearly separate scripts (clean_data.py vs aggregate_data.py) maintain modularity and clarity.
+
+Avoid single, large analysis notebooks: Dedicated notebooks per conclusion simplify navigation and debugging, especially if showcasing your work publicly or to recruiters.

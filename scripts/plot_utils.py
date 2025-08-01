@@ -1,3 +1,7 @@
+"""
+Utility functions for plotting data quicker.
+"""
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
