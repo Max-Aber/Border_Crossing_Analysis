@@ -68,7 +68,7 @@ def create_monthly_aggregation(df):
     Create monthly aggregation of all border crossings for total trend analysis.
     
     This aggregates all transportation types and ports by month to show
-    overall border crossing trends over time.
+    overall border crossing trends over time from 2000 onwards.
     
     Args:
         df (pd.DataFrame): Cleaned border crossing data
@@ -76,10 +76,19 @@ def create_monthly_aggregation(df):
     Returns:
         pd.DataFrame: Monthly aggregated data with columns: Date, Total_Crossings
     """
-    logger.info("Creating monthly aggregation for total trends")
+    logger.info("Creating monthly aggregation for total trends from 2000 onwards")
+    
+    # Filter data from January 2000 onwards
+    df_2000s = df[df['Date'] >= '2000-01-01'].copy()
+    
+    if len(df_2000s) == 0:
+        logger.warning("No data found from 2000 onwards")
+        return pd.DataFrame()
+    
+    logger.info(f"Using {len(df_2000s)} records from {df_2000s['Date'].min()} to {df_2000s['Date'].max()}")
     
     # Group by Date (month) and sum all crossings
-    monthly_df = df.groupby('Date')['Value'].sum().reset_index()
+    monthly_df = df_2000s.groupby('Date')['Value'].sum().reset_index()
     monthly_df = monthly_df.rename(columns={'Value': 'Total_Crossings'})
     
     # Sort by date for proper time series
@@ -101,7 +110,7 @@ def create_seasonal_aggregation(df):
     Create seasonal aggregation showing average crossings by season.
     
     This groups data by season (Winter, Spring, Summer, Fall) and calculates
-    average monthly crossings for each season across all years.
+    average monthly crossings for each season across all years from 2000 onwards.
     
     Args:
         df (pd.DataFrame): Cleaned border crossing data
@@ -109,10 +118,19 @@ def create_seasonal_aggregation(df):
     Returns:
         pd.DataFrame: Seasonal aggregated data with columns: Season, Avg_Monthly_Crossings, Total_Crossings
     """
-    logger.info("Creating seasonal aggregation")
+    logger.info("Creating seasonal aggregation from 2000 onwards")
+    
+    # Filter data from January 2000 onwards
+    df_2000s = df[df['Date'] >= '2000-01-01'].copy()
+    
+    if len(df_2000s) == 0:
+        logger.warning("No data found from 2000 onwards")
+        return pd.DataFrame()
+    
+    logger.info(f"Using {len(df_2000s)} records from {df_2000s['Date'].min()} to {df_2000s['Date'].max()}")
     
     # First, get monthly totals by season and year for proper averaging
-    monthly_seasonal = df.groupby(['Date', 'Season'])['Value'].sum().reset_index()
+    monthly_seasonal = df_2000s.groupby(['Date', 'Season'])['Value'].sum().reset_index()
     monthly_seasonal = monthly_seasonal.rename(columns={'Value': 'Monthly_Total'})
     
     # Then calculate average monthly crossings per season across all years
@@ -142,7 +160,7 @@ def create_measure_aggregation(df):
     Create monthly aggregation by transportation measure (crossing type).
     
     This shows monthly trends for each transportation category:
-    Personal, Commercial, Public, and Rail Transportation.
+    Personal, Commercial, Public, and Rail Transportation from 2000 onwards.
     
     Args:
         df (pd.DataFrame): Cleaned border crossing data
@@ -150,10 +168,19 @@ def create_measure_aggregation(df):
     Returns:
         pd.DataFrame: Monthly data by measure with columns: Date, Measure, Monthly_Crossings
     """
-    logger.info("Creating transportation measure aggregation")
+    logger.info("Creating transportation measure aggregation from 2000 onwards")
+    
+    # Filter data from January 2000 onwards
+    df_2000s = df[df['Date'] >= '2000-01-01'].copy()
+    
+    if len(df_2000s) == 0:
+        logger.warning("No data found from 2000 onwards")
+        return pd.DataFrame()
+    
+    logger.info(f"Using {len(df_2000s)} records from {df_2000s['Date'].min()} to {df_2000s['Date'].max()}")
     
     # Group by Date and Measure to get monthly totals by transportation type
-    measure_df = df.groupby(['Date', 'Measure'])['Value'].sum().reset_index()
+    measure_df = df_2000s.groupby(['Date', 'Measure'])['Value'].sum().reset_index()
     measure_df = measure_df.rename(columns={'Value': 'Monthly_Crossings'})
     
     # Sort by date and measure for proper organization
@@ -179,7 +206,8 @@ def create_border_region_aggregation(df):
     """
     Create monthly aggregation by border region (Canada vs Mexico).
     
-    This compares monthly crossing patterns between US-Canada and US-Mexico borders.
+    This compares monthly crossing patterns between US-Canada and US-Mexico borders
+    from 2000 onwards.
     
     Args:
         df (pd.DataFrame): Cleaned border crossing data
@@ -187,10 +215,19 @@ def create_border_region_aggregation(df):
     Returns:
         pd.DataFrame: Monthly data by border with columns: Date, Border, Monthly_Crossings
     """
-    logger.info("Creating border region aggregation")
+    logger.info("Creating border region aggregation from 2000 onwards")
+    
+    # Filter data from January 2000 onwards
+    df_2000s = df[df['Date'] >= '2000-01-01'].copy()
+    
+    if len(df_2000s) == 0:
+        logger.warning("No data found from 2000 onwards")
+        return pd.DataFrame()
+    
+    logger.info(f"Using {len(df_2000s)} records from {df_2000s['Date'].min()} to {df_2000s['Date'].max()}")
     
     # Group by Date and Border to get monthly totals by border region
-    border_df = df.groupby(['Date', 'Border'])['Value'].sum().reset_index()
+    border_df = df_2000s.groupby(['Date', 'Border'])['Value'].sum().reset_index()
     border_df = border_df.rename(columns={'Value': 'Monthly_Crossings'})
     
     # Sort by date and border for proper organization
