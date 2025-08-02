@@ -5,20 +5,18 @@ Contains both general-purpose plotting functions and domain-specific visualizati
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 from matplotlib.dates import DateFormatter
 import numpy as np
 
 # Set professional styling
 plt.style.use('default')
-sns.set_palette("husl")
 
 # ============================================================================
 # GENERAL PLOTTING UTILITIES (Reusable across any project)
 # ============================================================================
 
 def plot_time_series(df, x_col, y_col, title=None, xlabel=None, ylabel=None, 
-                    figsize=(12, 6), color=None, marker='o'):
+                    figsize=(20, 6), color=None, marker='o'):
     """
     Create a basic time series plot.
     
