@@ -1,27 +1,31 @@
 """
 This script is responsible for loading and cleaning the border crossing data.
-It saves the cleaned data to the border_crossings_clean.csv file which is 
-used for getting the aggregated data for analysis and plotting.
+It creates separate CSV files for different types of measurements: people counts and vehicle counts.
 
 This script reads in the Border_Crossing_Data.csv file into a pandas data frame, 
-processes it to clean and normalize the data, prepare it for aggregation, and then saves the cleaned data to 
-border_crossings_clean.csv.
+processes it to clean and normalize the data, and then saves separate cleaned datasets:
+- border_crossings_people.csv: Contains only people measurements
+- border_crossings_vehicles.csv: Contains only vehicle measurements  
+- border_crossings_clean.csv: Contains all cleaned data (original format preserved)
 
 Things it does to the data:
- - Removes zero values and NaN values
+ - Removes NaN values and negative values (preserves legitimate zeros)
  - Removes unnecessary columns ('Port Code', 'Latitude', 'Longitude', 'Point')
  - Normalize border names to 'Canada' and 'Mexico'
- - group by transportation measures: only group when they are from the same month, same border, and same port. 
-    Example. sum values from calexico port from february 2025 from Personal vehicles + Personal Vehicle Passengers + Pedestrians
- -- Personal Transportation: Personal Vehicles + Personal Vehicle Passengers + Pedestrians
- -- Commercial Transportation: Trucks + Truck Containers (Loaded/Empty)
- -- Public Transportation: Buses + Bus Passengers
- -- Rail Transportation: Trains + Train Passengers + Rail Containers (Loaded/Empty)
- 
+ - Sorts data chronologically and groups by port for optimal analysis
+ - Separates data by measurement type (people vs vehicles)
+ - Standardizes measure names for consistency
 
-Final Columns in the border_crossings_clean.csv file:
-Port Name,State,Border,Date,Season,Measure,Value
+Final output files:
+1. border_crossings_people.csv - Columns: Port Name,State,Border,Date,Season,Measure,Value
+   Where Measure is: Cars, Pedestrians, Buses, Trains (all representing people counts)
 
+2. border_crossings_vehicles.csv - Columns: Port Name,State,Border,Date,Season,Measure,Value  
+   Where Measure is: Cars, Trucks, Buses, Trains (all representing vehicle counts)
+
+3. border_crossings_clean.csv - Original measures preserved for reference
+
+Data is sorted chronologically (oldest first) and grouped by port for efficient analysis.
 """
 import pandas as pd
 import os
@@ -67,29 +71,38 @@ def load_raw_data(file_path):
 
 def remove_invalid_data(df):
     """
-    Remove rows with zero values, NaN values, and invalid data.
+    Remove rows with invalid data while preserving legitimate zero values.
+    
+    Zero values are preserved as they may indicate:
+    - Seasonal port closures
+    - Policy-driven traffic changes  
+    - Operational disruptions
+    - Legitimate periods of no crossings
     
     Args:
         df (pd.DataFrame): Input dataframe
         
     Returns:
-        pd.DataFrame: Dataframe with invalid data removed
+        pd.DataFrame: Dataframe with only invalid data removed
     """
-    logger.info("Removing invalid data (zeros, NaNs, negatives)")
+    logger.info("Removing invalid data (NaNs, negatives) while preserving zeros")
     
     initial_rows = len(df)
     
-    # Remove rows where Value is zero, NaN, or negative
+    # Remove rows with invalid data but keep legitimate zeros
     df_clean = df.copy()
-    df_clean = df_clean.dropna(subset=['Value'])  # Remove NaN values
-    df_clean = df_clean[df_clean['Value'] > 0]    # Remove zero and negative values
+    df_clean = df_clean.dropna(subset=['Value'])     # Remove NaN values
+    df_clean = df_clean[df_clean['Value'] >= 0]      # Remove negative values, keep zeros
     
     # Remove rows with missing essential information
     essential_columns = ['Port Name', 'Border', 'Date', 'Measure']
     df_clean = df_clean.dropna(subset=essential_columns)
     
     removed_rows = initial_rows - len(df_clean)
+    zeros_preserved = (df_clean['Value'] == 0).sum()
+    
     logger.info(f"Removed {removed_rows} invalid rows ({removed_rows/initial_rows*100:.1f}%)")
+    logger.info(f"Preserved {zeros_preserved} legitimate zero values for analysis")
     
     return df_clean
 
@@ -155,6 +168,47 @@ def normalize_border_names(df):
     return df_clean
 
 
+def sort_data_for_analysis(df):
+    """
+    Sort data chronologically and group by port for optimal analysis structure.
+    
+    This function organizes data to facilitate:
+    - Time series analysis (chronological order)
+    - Port-specific analysis (grouped by location)
+    - Efficient data access patterns
+    
+    Sorting hierarchy:
+    1. Date (chronological, oldest first)
+    2. Port Name (alphabetical for consistency)  
+    3. State (for ports with same names)
+    4. Measure (for consistent grouping)
+    
+    Args:
+        df (pd.DataFrame): Input dataframe
+        
+    Returns:
+        pd.DataFrame: Sorted dataframe optimized for analysis
+    """
+    logger.info("Sorting data chronologically and grouping by port")
+    
+    # Define sort order for optimal analysis
+    sort_columns = ['Date', 'Port Name', 'State', 'Measure']
+    
+    # Sort data with multiple criteria
+    df_sorted = df.sort_values(by=sort_columns, ascending=True).reset_index(drop=True)
+    
+    # Log sorting results for validation
+    date_range = f"{df_sorted['Date'].min()} to {df_sorted['Date'].max()}"
+    unique_ports = df_sorted['Port Name'].nunique()
+    
+    logger.info(f"Data sorted successfully:")
+    logger.info(f"  • Date range: {date_range}")
+    logger.info(f"  • {unique_ports} unique ports")
+    logger.info(f"  • {len(df_sorted)} total records")
+    
+    return df_sorted
+
+
 def normalize_dates(df):
     """
     Convert date column to proper datetime format and add season information.
@@ -192,87 +246,91 @@ def normalize_dates(df):
     return df_clean
 
 
-def categorize_transportation_measures(df):
+def create_people_dataset(df):
     """
-    Group transportation measures into four main categories and aggregate values.
+    Create a dataset containing only people measurements with standardized measure names.
+    
+    This function filters the data to include only measurements that count people,
+    not vehicles or containers. It standardizes the measure names for consistency.
     
     Args:
-        df (pd.DataFrame): Input dataframe
+        df (pd.DataFrame): Cleaned dataframe with all measures
         
     Returns:
-        pd.DataFrame: Dataframe with categorized transportation measures
+        pd.DataFrame: Dataframe containing only people measurements
     """
-    logger.info("Categorizing transportation measures")
+    logger.info("Creating people dataset")
     
-    # Define transportation categories based on requirements
-    transportation_categories = {
-        'Personal Transportation': [
-            'Personal Vehicles', 
-            'Personal Vehicle Passengers', 
-            'Pedestrians'
-        ],
-        'Commercial Transportation': [
-            'Trucks', 
-            'Truck Containers Loaded', 
-            'Truck Containers Empty'
-        ],
-        'Public Transportation': [
-            'Buses', 
-            'Bus Passengers'
-        ],
-        'Rail Transportation': [
-            'Trains', 
-            'Train Passengers', 
-            'Rail Containers Loaded', 
-            'Rail Containers Empty'
-        ]
+    # Define mapping from original measures to standardized people measures
+    people_measure_mapping = {
+        'Personal Vehicle Passengers': 'Cars',      # People traveling in cars
+        'Pedestrians': 'Pedestrians',               # People walking
+        'Bus Passengers': 'Buses',                  # People traveling in buses  
+        'Train Passengers': 'Trains'                # People traveling in trains
     }
     
-    # Create reverse mapping from measure to category
-    measure_to_category = {}
-    for category, measures in transportation_categories.items():
-        for measure in measures:
-            measure_to_category[measure] = category
+    # Filter data to include only people measurements
+    people_measures = list(people_measure_mapping.keys())
+    df_people = df[df['Measure'].isin(people_measures)].copy()
     
-    df_clean = df.copy()
+    # Standardize measure names
+    df_people['Measure'] = df_people['Measure'].map(people_measure_mapping)
     
-    # Map existing measures to categories
-    df_clean['Transportation_Category'] = df_clean['Measure'].map(measure_to_category)
+    logger.info(f"People dataset created with {len(df_people)} rows")
+    logger.info(f"People measures distribution: {df_people['Measure'].value_counts().to_dict()}")
     
-    # Check for unmapped measures
-    unmapped_measures = df_clean[df_clean['Transportation_Category'].isna()]['Measure'].unique()
-    if len(unmapped_measures) > 0:
-        logger.warning(f"Found unmapped transportation measures: {unmapped_measures}")
-        # For unmapped measures, keep original measure name
-        df_clean['Transportation_Category'] = df_clean['Transportation_Category'].fillna(df_clean['Measure'])
-    
-    logger.info("Original measures distribution:")
-    logger.info(df_clean['Measure'].value_counts().to_dict())
-    
-    # Aggregate values by grouping same transportation categories
-    # Group by: Port Name, State, Border, Date, Season, Transportation_Category
-    grouping_columns = ['Port Name', 'State', 'Border', 'Date', 'Season', 'Transportation_Category']
-    df_aggregated = df_clean.groupby(grouping_columns)['Value'].sum().reset_index()
-    
-    # Rename Transportation_Category back to Measure for consistency
-    df_aggregated = df_aggregated.rename(columns={'Transportation_Category': 'Measure'})
-    
-    logger.info(f"Aggregated from {len(df_clean)} to {len(df_aggregated)} rows")
-    logger.info("Final transportation categories distribution:")
-    logger.info(df_aggregated['Measure'].value_counts().to_dict())
-    
-    return df_aggregated
+    return df_people
 
 
-def save_cleaned_data(df, output_path):
+def create_vehicles_dataset(df):
     """
-    Save the cleaned dataframe to CSV file.
+    Create a dataset containing only vehicle measurements with standardized measure names.
+    
+    This function filters the data to include only measurements that count vehicles,
+    not people or containers. It standardizes the measure names for consistency.
     
     Args:
-        df (pd.DataFrame): Cleaned dataframe to save
-        output_path (str): Path where to save the cleaned data
+        df (pd.DataFrame): Cleaned dataframe with all measures
+        
+    Returns:
+        pd.DataFrame: Dataframe containing only vehicle measurements
     """
-    logger.info(f"Saving cleaned data to: {output_path}")
+    logger.info("Creating vehicles dataset")
+    
+    # Define mapping from original measures to standardized vehicle measures
+    vehicle_measure_mapping = {
+        'Personal Vehicles': 'Cars',                # Personal vehicles/cars
+        'Trucks': 'Trucks',                         # Commercial trucks
+        'Buses': 'Buses',                           # Bus vehicles
+        'Trains': 'Trains'                          # Train vehicles
+    }
+    
+    # Filter data to include only vehicle measurements
+    vehicle_measures = list(vehicle_measure_mapping.keys())
+    df_vehicles = df[df['Measure'].isin(vehicle_measures)].copy()
+    
+    # Standardize measure names
+    df_vehicles['Measure'] = df_vehicles['Measure'].map(vehicle_measure_mapping)
+    
+    logger.info(f"Vehicles dataset created with {len(df_vehicles)} rows")
+    logger.info(f"Vehicle measures distribution: {df_vehicles['Measure'].value_counts().to_dict()}")
+    
+    return df_vehicles
+
+
+def save_dataset(df, output_path, dataset_name):
+    """
+    Save a dataset to CSV file with proper logging and error handling.
+    
+    This function follows the Single Responsibility Principle by handling
+    only the saving logic with comprehensive logging.
+    
+    Args:
+        df (pd.DataFrame): Dataset to save
+        output_path (str): Path where to save the file
+        dataset_name (str): Human-readable name for logging
+    """
+    logger.info(f"Saving {dataset_name} to: {output_path}")
     
     # Ensure output directory exists
     output_dir = os.path.dirname(output_path)
@@ -280,25 +338,44 @@ def save_cleaned_data(df, output_path):
         os.makedirs(output_dir)
         logger.info(f"Created output directory: {output_dir}")
     
-    # Save to CSV
-    df.to_csv(output_path, index=False)
-    
-    logger.info(f"Successfully saved {len(df)} rows to {output_path}")
-    logger.info(f"Final columns: {list(df.columns)}")
+    try:
+        # Save to CSV
+        df.to_csv(output_path, index=False)
+        logger.info(f"Successfully saved {len(df)} rows to {output_path}")
+        logger.info(f"Columns in {dataset_name}: {list(df.columns)}")
+        
+        # Log basic statistics for validation
+        if 'Measure' in df.columns:
+            logger.info(f"Measures in {dataset_name}: {df['Measure'].unique().tolist()}")
+        
+    except Exception as e:
+        logger.error(f"Error saving {dataset_name}: {str(e)}")
+        raise
 
 
 def clean_data():
     """
-    Main data cleaning function that can be imported and used by other scripts.
+    Main data cleaning function that creates separate datasets for people and vehicles.
+    
+    This function processes the raw border crossing data and creates three output files:
+    1. People dataset - Contains only people measurements (passengers, pedestrians)
+    2. Vehicles dataset - Contains only vehicle measurements (cars, trucks, buses, trains)
+    3. Complete cleaned dataset - All measures preserved for reference
     
     Returns:
-        pd.DataFrame: Cleaned border crossing data
+        tuple: (people_df, vehicles_df, complete_df) - All three cleaned datasets
     """
-    # Define file paths
+    # Define file paths following clean code principles
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
+    
+    # Input path
     raw_data_path = os.path.join(project_root, 'data', 'raw', 'Border_Crossing_Data.csv')
-    output_path = os.path.join(project_root, 'data', 'border_crossings_clean.csv')
+    
+    # Output paths  
+    people_output_path = os.path.join(project_root, 'data', 'border_crossings_people.csv')
+    vehicles_output_path = os.path.join(project_root, 'data', 'border_crossings_vehicles.csv')
+    complete_output_path = os.path.join(project_root, 'data', 'border_crossings_clean.csv')
     
     logger.info("Starting border crossing data cleaning pipeline")
     
@@ -306,26 +383,34 @@ def clean_data():
         # Step 1: Load raw data
         df = load_raw_data(raw_data_path)
         
-        # Step 2: Remove invalid data
+        # Step 2: Remove invalid data (NaNs, negatives) while preserving zeros
         df = remove_invalid_data(df)
         
-        # Step 3: Remove unnecessary columns
+        # Step 3: Remove unnecessary columns (Port Code, Lat, Lon, Point)
         df = remove_unnecessary_columns(df)
         
-        # Step 4: Normalize border names
+        # Step 4: Normalize border names (US-Canada -> Canada, US-Mexico -> Mexico)
         df = normalize_border_names(df)
         
-        # Step 5: Normalize dates and add seasons
+        # Step 5: Normalize dates and add season information
         df = normalize_dates(df)
         
-        # Step 6: Categorize and aggregate transportation measures
-        df = categorize_transportation_measures(df)
+        # Step 6: Sort data chronologically and group by port
+        df = sort_data_for_analysis(df)
         
-        # Step 7: Save cleaned data
-        save_cleaned_data(df, output_path)
+        # Step 7: Create specialized datasets (maintaining sort order)
+        people_df = create_people_dataset(df)
+        vehicles_df = create_vehicles_dataset(df)
+        
+        # Step 8: Save all datasets
+        save_dataset(people_df, people_output_path, "people dataset")
+        save_dataset(vehicles_df, vehicles_output_path, "vehicles dataset") 
+        save_dataset(df, complete_output_path, "complete cleaned dataset")
         
         logger.info("Data cleaning pipeline completed successfully")
-        return df
+        logger.info(f"Created {len(people_df)} people records and {len(vehicles_df)} vehicle records")
+        
+        return people_df, vehicles_df, df
         
     except Exception as e:
         logger.error(f"Error in data cleaning pipeline: {str(e)}")
@@ -337,19 +422,52 @@ def main():
     Main function that orchestrates the data processing pipeline.
     
     This function serves as the entry point when the script is run directly.
-    It calls the clean_data function and handles any errors at the top level.
+    It calls the clean_data function and provides comprehensive reporting
+    of the cleaning results to help users understand what was processed.
     """
     try:
-        cleaned_df = clean_data()
-        print(f"\nData cleaning completed successfully!")
-        print(f"Cleaned dataset shape: {cleaned_df.shape}")
-        print(f"Columns: {list(cleaned_df.columns)}")
-        print(f"Date range: {cleaned_df['Date'].min()} to {cleaned_df['Date'].max()}")
-        print(f"Borders: {cleaned_df['Border'].unique()}")
-        print(f"Transportation measures: {cleaned_df['Measure'].unique()}")
+        # Run the cleaning pipeline
+        people_df, vehicles_df, complete_df = clean_data()
+        
+        # Report results to user
+        print(f"\n" + "="*60)
+        print("DATA CLEANING COMPLETED SUCCESSFULLY!")
+        print("="*60)
+        
+        print(f"\n📋 SUMMARY:")
+        print(f"   • Complete dataset: {complete_df.shape[0]:,} rows")
+        print(f"   • People dataset: {people_df.shape[0]:,} rows") 
+        print(f"   • Vehicles dataset: {vehicles_df.shape[0]:,} rows")
+        
+        print(f"\n📅 DATE RANGE:")
+        print(f"   • From: {complete_df['Date'].min().strftime('%B %Y')}")
+        print(f"   • To: {complete_df['Date'].max().strftime('%B %Y')}")
+        
+        print(f"\n🌍 BORDERS:")
+        border_counts = complete_df['Border'].value_counts()
+        for border, count in border_counts.items():
+            print(f"   • {border}: {count:,} records")
+        
+        print(f"\n👥 PEOPLE MEASUREMENTS:")
+        people_measures = people_df['Measure'].value_counts()
+        for measure, count in people_measures.items():
+            print(f"   • {measure}: {count:,} records")
+            
+        print(f"\n🚗 VEHICLE MEASUREMENTS:")
+        vehicle_measures = vehicles_df['Measure'].value_counts()
+        for measure, count in vehicle_measures.items():
+            print(f"   • {measure}: {count:,} records")
+        
+        print(f"\n📁 OUTPUT FILES CREATED:")
+        print(f"   • border_crossings_people.csv")
+        print(f"   • border_crossings_vehicles.csv") 
+        print(f"   • border_crossings_clean.csv")
+        
+        print(f"\n✅ Ready for analysis!")
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"\n❌ ERROR: {str(e)}")
+        logger.error(f"Main function failed: {str(e)}")
         return 1
     
     return 0

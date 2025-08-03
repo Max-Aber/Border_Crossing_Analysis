@@ -17,21 +17,21 @@ This dataset contains monthly border crossing statistics for both the US-Canada 
 - **Date**: Month and year of the crossing data in "MMM YYYY" format (e.g., "Jan 2024", "Apr 2024")
 - **Measure**: Type of crossing being measured with the following categories:
   - **Personal Transportation**:
-    - Personal Vehicles
-    - Personal Vehicle Passengers
-    - Pedestrians
+    - Personal Vehicles (Just the Vehicle)
+    - Personal Vehicle Passengers (Just the people)
+    - Pedestrians (People)
   - **Commercial Transportation**:
-    - Trucks
-    - Truck Containers Loaded
-    - Truck Containers Empty
+    - Trucks (Just the Vehicle)
+    - Truck Containers Loaded (Just the containers)
+    - Truck Containers Empty (Just the containers)
   - **Public Transportation**:
-    - Buses
-    - Bus Passengers
+    - Buses (Just the Vehicle)
+    - Bus Passengers (Just the people)
   - **Rail Transportation**:
-    - Trains
-    - Train Passengers
-    - Rail Containers Loaded
-    - Rail Containers Empty
+    - Trains (Just the Vehicle)
+    - Train Passengers (Just the people)
+    - Rail Containers Loaded (Just the containers)
+    - Rail Containers Empty (Just the containers)
 - **Value**: Numerical count of the crossings for the specific measure
 - **Latitude**: Geographic latitude coordinate of the port
 - **Longitude**: Geographic longitude coordinate of the port
