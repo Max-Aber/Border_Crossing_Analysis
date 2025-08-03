@@ -5,7 +5,7 @@ Contains both general-purpose plotting functions and domain-specific visualizati
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.dates import DateFormatter
+from matplotlib.dates import DateFormatter, YearLocator, MonthLocator
 import numpy as np
 
 # Set professional styling
@@ -31,13 +31,22 @@ def plot_time_series(df, x_col, y_col, title=None, xlabel=None, ylabel=None,
         color: Line color
         marker: Marker style
     """
-    plt.figure(figsize=figsize)
-    plt.plot(df[x_col], df[y_col], marker=marker, linestyle='-', color=color)
-    plt.title(title or f'Time Series of {y_col}')
-    plt.xlabel(xlabel or x_col)
-    plt.ylabel(ylabel or y_col)
-    plt.grid(True, alpha=0.3)
-    plt.xticks(rotation=45)
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Create the plot
+    ax.plot(df[x_col], df[y_col], marker=marker, linestyle='-', color=color)
+    
+    # Set titles and labels
+    ax.set_title(title or f'Time Series of {y_col}')
+    ax.set_xlabel(xlabel or x_col)
+    ax.set_ylabel(ylabel or y_col)
+    
+    # Apply formatting utilities
+    auto_format_y_axis(ax, df[y_col])  # Auto-format y-axis (millions/thousands)
+    format_date_axis(ax, df, x_col)    # Smart date formatting to prevent overlap
+    
+    # Add grid and styling
+    ax.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
 
@@ -301,14 +310,61 @@ def format_thousands(ax, axis='y'):
     else:
         ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x/1e3:.0f}K'))
 
-def set_professional_style():
-    """Set professional plotting style for all charts."""
-    plt.rcParams.update({
-        'figure.figsize': (12, 8),
-        'axes.titlesize': 14,
-        'axes.labelsize': 12,
-        'xtick.labelsize': 10,
-        'ytick.labelsize': 10,
-        'legend.fontsize': 11,
-        'grid.alpha': 0.3
-    })
+def format_date_axis(ax, df, x_col):
+    """
+    Format x-axis dates to prevent overlapping based on data range.
+    
+    Rules:
+    - More than 10 years: Show only years
+    - 5-10 years: Show every 6 months 
+    - 4 years or less: Show every month
+    
+    Args:
+        ax: matplotlib axis object
+        df: DataFrame containing the data
+        x_col: Column name for x-axis dates
+    """
+    # Ensure the date column is datetime
+    if not pd.api.types.is_datetime64_any_dtype(df[x_col]):
+        dates = pd.to_datetime(df[x_col])
+    else:
+        dates = df[x_col]
+    
+    # Calculate date range in years
+    date_range_years = (dates.max() - dates.min()).days / 365.25
+    
+    if date_range_years > 10:
+        # Show only years for longer ranges (>10 years)
+        # For 20+ years, show every 2-3 years to avoid crowding
+        year_interval = 3 if date_range_years > 15 else 2
+        ax.xaxis.set_major_locator(YearLocator(base=year_interval))
+        ax.xaxis.set_major_formatter(DateFormatter('%Y'))
+        ax.tick_params(axis='x', rotation=0)
+        
+    elif date_range_years >= 5:
+        # Show every 6 months for 5-10 years
+        ax.xaxis.set_major_locator(MonthLocator(interval=6))  # Every 6 months
+        ax.xaxis.set_major_formatter(DateFormatter('%Y-%m'))
+        ax.tick_params(axis='x', rotation=45)
+        
+    else:
+        # Show every month for ≤4 years
+        ax.xaxis.set_major_locator(MonthLocator(interval=1))  # Every month
+        ax.xaxis.set_major_formatter(DateFormatter('%Y-%m'))
+        ax.tick_params(axis='x', rotation=45)
+
+def auto_format_y_axis(ax, values):
+    """
+    Automatically format y-axis based on value range.
+    
+    Args:
+        ax: matplotlib axis object
+        values: Series or array of y-values
+    """
+    max_value = values.max()
+    
+    if max_value >= 1e6:
+        format_millions(ax, 'y')
+    elif max_value >= 1e3:
+        format_thousands(ax, 'y')
+    # If values are less than 1000, keep default formatting
