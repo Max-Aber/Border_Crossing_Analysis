@@ -3,11 +3,11 @@ This script is responsible for making the aggregated csv for analysis and plotti
 It reads the people data from border_crossings_people.csv and saves the aggregated 
 data in separate csv files. The following files are created, only count data from 
 2000 onwards:
- - monthly_crossings.csv          # Aggregated monthly data for total trends
- - seasonal_crossings.csv         # Data grouped by season (Winter/Spring/Summer/Fall)
- - measure_crossings.csv          # Aggregated monthly by crossing type
- - border_region_crossings.csv    # Aggregated monthly by US-MX/US-CAN border
- - top_ports_crossings_2000s.csv  # Total Crossings by ports
+ - monthly_crossings_people.csv          # Aggregated monthly data for total trends
+ - seasonal_crossings_people.csv         # Data grouped by season (Winter/Spring/Summer/Fall)
+ - measure_crossings_people.csv          # Aggregated monthly by crossing type
+ - border_region_crossings_people.csv    # Aggregated monthly by US-MX/US-CAN border
+ - top_ports_crossings_people_2000s.csv  # Total Crossings by ports
 """
 import pandas as pd
 import os
@@ -354,23 +354,23 @@ def aggregate_data():
         
         # Step 2: Create monthly aggregation for total trends
         monthly_df = create_monthly_aggregation(df)
-        save_aggregated_data(monthly_df, 'monthly_crossings.csv', processed_dir)
+        save_aggregated_data(monthly_df, 'monthly_crossings_people.csv', processed_dir)
         
         # Step 3: Create seasonal aggregation
         seasonal_df = create_seasonal_aggregation(df)
-        save_aggregated_data(seasonal_df, 'seasonal_crossings.csv', processed_dir)
+        save_aggregated_data(seasonal_df, 'seasonal_crossings_people.csv', processed_dir)
         
         # Step 4: Create transportation measure aggregation
         measure_df = create_measure_aggregation(df)
-        save_aggregated_data(measure_df, 'measure_crossings.csv', processed_dir)
+        save_aggregated_data(measure_df, 'measure_crossings_people.csv', processed_dir)
         
         # Step 5: Create border region aggregation
         border_df = create_border_region_aggregation(df)
-        save_aggregated_data(border_df, 'border_region_crossings.csv', processed_dir)
+        save_aggregated_data(border_df, 'border_region_crossings_people.csv', processed_dir)
         
         # Step 6: Create top ports aggregation
         ports_df = create_top_ports_aggregation(df)
-        save_aggregated_data(ports_df, 'top_ports_crossings_2000s.csv', processed_dir)
+        save_aggregated_data(ports_df, 'top_ports_crossings_people_2000s.csv', processed_dir)
         
         logger.info("Data aggregation pipeline completed successfully")
         
@@ -426,11 +426,11 @@ def main():
         print(f"\n✅ All aggregated files saved to: data/processed/")
         print(f"📁 Files created:")
         files = [
-            'monthly_crossings.csv',
-            'seasonal_crossings.csv', 
-            'measure_crossings.csv',
-            'border_region_crossings.csv',
-            'top_ports_crossings_2000s.csv'
+            'monthly_crossings_people.csv',
+            'seasonal_crossings_people.csv', 
+            'measure_crossings_people.csv',
+            'border_region_crossings_people.csv',
+            'top_ports_crossings_people_2000s.csv'
         ]
         
         for file in files:

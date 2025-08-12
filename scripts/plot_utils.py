@@ -8,15 +8,15 @@ import pandas as pd
 from matplotlib.dates import DateFormatter, YearLocator, MonthLocator
 import numpy as np
 
-# Set professional styling
-plt.style.use('default')
+# Set dark background styling
+plt.style.use('dark_background')
 
 # ============================================================================
 # GENERAL PLOTTING UTILITIES (Reusable across any project)
 # ============================================================================
 
 def plot_time_series(df, x_col, y_col, title=None, xlabel=None, ylabel=None, 
-                    figsize=(20, 6), color=None, marker='o'):
+                    figsize=(20, 6), color=None, marker='o', show=True):
     """
     Create a basic time series plot.
     
@@ -30,6 +30,10 @@ def plot_time_series(df, x_col, y_col, title=None, xlabel=None, ylabel=None,
         figsize: Figure size tuple
         color: Line color
         marker: Marker style
+        show: If True, display the plot immediately. If False, return fig and ax
+        
+    Returns:
+        tuple: (fig, ax) if show=False, otherwise None
     """
     fig, ax = plt.subplots(figsize=figsize)
     
@@ -48,7 +52,12 @@ def plot_time_series(df, x_col, y_col, title=None, xlabel=None, ylabel=None,
     # Add grid and styling
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.show()
+    
+    if show:
+        plt.show()
+        return None
+    else:
+        return fig, ax
 
 def plot_multiple_lines(df, x_col, y_cols, title=None, xlabel=None, ylabel=None, 
                        figsize=(14, 8), legend_labels=None):
