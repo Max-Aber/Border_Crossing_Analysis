@@ -1,12 +1,13 @@
 """
 This script is responsible for making the aggregated csv for analysis and plotting.
-It reads the cleaned data from border_crossings_clean.csv and saves the aggregated 
-data in seperate csv files. The following files are created:
+It reads the people data from border_crossings_people.csv and saves the aggregated 
+data in separate csv files. The following files are created, only count data from 
+2000 onwards:
  - monthly_crossings.csv          # Aggregated monthly data for total trends
  - seasonal_crossings.csv         # Data grouped by season (Winter/Spring/Summer/Fall)
  - measure_crossings.csv          # Aggregated monthly by crossing type
  - border_region_crossings.csv    # Aggregated monthly by US-MX/US-CAN border
- - top_ports_crossings_2000s.csv  # Total Crossings by ports since Jan 2000
+ - top_ports_crossings_2000s.csv  # Total Crossings by ports
 """
 import pandas as pd
 import os
@@ -18,27 +19,27 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def load_cleaned_data(file_path):
+def load_people_data(file_path):
     """
-    Load the cleaned border crossing data from CSV file.
+    Load the people border crossing data from CSV file.
     
     Args:
-        file_path (str): Path to the cleaned CSV file
+        file_path (str): Path to the people CSV file
         
     Returns:
-        pd.DataFrame: Cleaned border crossing data ready for aggregation
+        pd.DataFrame: People border crossing data ready for aggregation
         
     Raises:
-        FileNotFoundError: If the cleaned data file doesn't exist
+        FileNotFoundError: If the people data file doesn't exist
         ValueError: If required columns are missing
     """
-    logger.info(f"Loading cleaned data from: {file_path}")
+    logger.info(f"Loading people data from: {file_path}")
     
     if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Cleaned data file not found: {file_path}")
+        raise FileNotFoundError(f"People data file not found: {file_path}")
     
     try:
-        # Load the cleaned data
+        # Load the people data
         df = pd.read_csv(file_path)
         
         # Validate required columns exist
@@ -54,29 +55,29 @@ def load_cleaned_data(file_path):
         logger.info(f"Successfully loaded {len(df)} rows and {len(df.columns)} columns")
         logger.info(f"Date range: {df['Date'].min()} to {df['Date'].max()}")
         logger.info(f"Borders: {df['Border'].unique()}")
-        logger.info(f"Transportation measures: {df['Measure'].unique()}")
+        logger.info(f"People transportation measures: {df['Measure'].unique()}")
         
         return df
         
     except Exception as e:
-        logger.error(f"Error loading cleaned data: {str(e)}")
+        logger.error(f"Error loading people data: {str(e)}")
         raise
 
 
 def create_monthly_aggregation(df):
     """
-    Create monthly aggregation of all border crossings for total trend analysis.
+    Create monthly aggregation of all people border crossings for total trend analysis.
     
-    This aggregates all transportation types and ports by month to show
-    overall border crossing trends over time from 2000 onwards.
+    This aggregates all people transportation types and ports by month to show
+    overall people border crossing trends over time from 2000 onwards.
     
     Args:
-        df (pd.DataFrame): Cleaned border crossing data
+        df (pd.DataFrame): People border crossing data
         
     Returns:
         pd.DataFrame: Monthly aggregated data with columns: Date, Total_Crossings
     """
-    logger.info("Creating monthly aggregation for total trends from 2000 onwards")
+    logger.info("Creating monthly people aggregation for total trends from 2000 onwards")
     
     # Filter data from January 2000 onwards
     df_2000s = df[df['Date'] >= '2000-01-01'].copy()
@@ -107,18 +108,18 @@ def create_monthly_aggregation(df):
 
 def create_seasonal_aggregation(df):
     """
-    Create seasonal aggregation showing average crossings by season.
+    Create seasonal aggregation showing average people crossings by season.
     
-    This groups data by season (Winter, Spring, Summer, Fall) and calculates
+    This groups people data by season (Winter, Spring, Summer, Fall) and calculates
     average monthly crossings for each season across all years from 2000 onwards.
     
     Args:
-        df (pd.DataFrame): Cleaned border crossing data
+        df (pd.DataFrame): People border crossing data
         
     Returns:
         pd.DataFrame: Seasonal aggregated data with columns: Season, Avg_Monthly_Crossings, Total_Crossings
     """
-    logger.info("Creating seasonal aggregation from 2000 onwards")
+    logger.info("Creating seasonal people aggregation from 2000 onwards")
     
     # Filter data from January 2000 onwards
     df_2000s = df[df['Date'] >= '2000-01-01'].copy()
@@ -157,18 +158,18 @@ def create_seasonal_aggregation(df):
 
 def create_measure_aggregation(df):
     """
-    Create monthly aggregation by transportation measure (crossing type).
+    Create monthly aggregation by people transportation measure (crossing type).
     
-    This shows monthly trends for each transportation category:
-    Personal, Commercial, Public, and Rail Transportation from 2000 onwards.
+    This shows monthly trends for each people transportation category:
+    Cars, Buses, Trains, and Pedestrians from 2000 onwards.
     
     Args:
-        df (pd.DataFrame): Cleaned border crossing data
+        df (pd.DataFrame): People border crossing data
         
     Returns:
         pd.DataFrame: Monthly data by measure with columns: Date, Measure, Monthly_Crossings
     """
-    logger.info("Creating transportation measure aggregation from 2000 onwards")
+    logger.info("Creating people transportation measure aggregation from 2000 onwards")
     
     # Filter data from January 2000 onwards
     df_2000s = df[df['Date'] >= '2000-01-01'].copy()
@@ -204,18 +205,18 @@ def create_measure_aggregation(df):
 
 def create_border_region_aggregation(df):
     """
-    Create monthly aggregation by border region (Canada vs Mexico).
+    Create monthly aggregation of people crossings by border region (Canada vs Mexico).
     
-    This compares monthly crossing patterns between US-Canada and US-Mexico borders
+    This compares monthly people crossing patterns between US-Canada and US-Mexico borders
     from 2000 onwards.
     
     Args:
-        df (pd.DataFrame): Cleaned border crossing data
+        df (pd.DataFrame): People border crossing data
         
     Returns:
         pd.DataFrame: Monthly data by border with columns: Date, Border, Monthly_Crossings
     """
-    logger.info("Creating border region aggregation from 2000 onwards")
+    logger.info("Creating people border region aggregation from 2000 onwards")
     
     # Filter data from January 2000 onwards
     df_2000s = df[df['Date'] >= '2000-01-01'].copy()
@@ -251,17 +252,17 @@ def create_border_region_aggregation(df):
 
 def create_top_ports_aggregation(df):
     """
-    Create aggregation of top ports by total crossings since January 2000.
+    Create aggregation of top ports by total people crossings since January 2000.
     
-    This identifies the busiest border crossing ports for focused analysis.
+    This identifies the busiest border crossing ports for people for focused analysis.
     
     Args:
-        df (pd.DataFrame): Cleaned border crossing data
+        df (pd.DataFrame): People border crossing data
         
     Returns:
         pd.DataFrame: Top ports data with columns: Port Name, State, Border, Total_Crossings, Avg_Monthly_Crossings
     """
-    logger.info("Creating top ports aggregation since 2000")
+    logger.info("Creating top ports people aggregation since 2000")
     
     # Filter data from January 2000 onwards
     df_2000s = df[df['Date'] >= '2000-01-01'].copy()
@@ -342,14 +343,14 @@ def aggregate_data():
     # Define file paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
-    cleaned_data_path = os.path.join(project_root, 'data', 'border_crossings_clean.csv')
+    people_data_path = os.path.join(project_root, 'data', 'processed', 'border_crossings_people.csv')
     processed_dir = os.path.join(project_root, 'data', 'processed')
     
-    logger.info("Starting border crossing data aggregation pipeline")
+    logger.info("Starting people border crossing data aggregation pipeline")
     
     try:
-        # Step 1: Load cleaned data
-        df = load_cleaned_data(cleaned_data_path)
+        # Step 1: Load people data
+        df = load_people_data(people_data_path)
         
         # Step 2: Create monthly aggregation for total trends
         monthly_df = create_monthly_aggregation(df)

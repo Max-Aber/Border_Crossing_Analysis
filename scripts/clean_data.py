@@ -372,10 +372,10 @@ def clean_data():
     # Input path
     raw_data_path = os.path.join(project_root, 'data', 'raw', 'Border_Crossing_Data.csv')
     
-    # Output paths  
-    people_output_path = os.path.join(project_root, 'data', 'border_crossings_people.csv')
-    vehicles_output_path = os.path.join(project_root, 'data', 'border_crossings_vehicles.csv')
-    complete_output_path = os.path.join(project_root, 'data', 'border_crossings_clean.csv')
+    # Output paths (saving to processed folder)
+    people_output_path = os.path.join(project_root, 'data', 'processed', 'border_crossings_people.csv')
+    vehicles_output_path = os.path.join(project_root, 'data', 'processed', 'border_crossings_vehicles.csv')
+    complete_output_path = os.path.join(project_root, 'data', 'processed', 'border_crossings_clean.csv')
     
     logger.info("Starting border crossing data cleaning pipeline")
     
