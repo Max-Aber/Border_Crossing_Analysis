@@ -20,9 +20,9 @@ This project has as a goal to analyze the following:
 - Python (pandas, matplotlib)
 - Jupyter Notebook
 
-## Key Findings
+## Findings
 
-- TBF
+See the detailed write-up here: [Conclusions](/outputs/conclusions.md)
 
 ## How to Run
 
