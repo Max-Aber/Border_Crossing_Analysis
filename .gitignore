@@ -16,5 +16,10 @@ desktop.ini
 # VS Code settings (optional)
 .vscode/
 
-# other
+# Node.js / npm
+node_modules/
+dist/
+package-lock.json
+
+# Other
 run_dashboard.md
