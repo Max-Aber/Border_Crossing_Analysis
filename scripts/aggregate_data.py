@@ -404,7 +404,7 @@ def main():
         print("="*60)
         
         # Print summary statistics for each dataset
-        print(f"\n📊 AGGREGATED DATASETS SUMMARY:")
+        print(f"\nAGGREGATED DATASETS SUMMARY:")
         print(f"{'Dataset':<30} {'Records':<10} {'Description'}")
         print(f"{'-'*30} {'-'*10} {'-'*40}")
         
@@ -423,8 +423,8 @@ def main():
             else:
                 print(f"{name:<30} {'0':<10} {description} (EMPTY)")
         
-        print(f"\n✅ All aggregated files saved to: data/processed/")
-        print(f"📁 Files created:")
+        print(f"\nAll aggregated files saved to: data/processed/")
+        print(f"Files created:")
         files = [
             'monthly_crossings_people.csv',
             'seasonal_crossings_people.csv', 
@@ -436,10 +436,10 @@ def main():
         for file in files:
             print(f"   • {file}")
         
-        print(f"\n🎯 Ready for analysis notebooks!")
+        print(f"\nReady for analysis notebooks!")
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"Error: {str(e)}")
         return 1
     
     return 0

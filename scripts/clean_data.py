@@ -434,39 +434,39 @@ def main():
         print("DATA CLEANING COMPLETED SUCCESSFULLY!")
         print("="*60)
         
-        print(f"\n📋 SUMMARY:")
+        print(f"\nSUMMARY:")
         print(f"   • Complete dataset: {complete_df.shape[0]:,} rows")
         print(f"   • People dataset: {people_df.shape[0]:,} rows") 
         print(f"   • Vehicles dataset: {vehicles_df.shape[0]:,} rows")
         
-        print(f"\n📅 DATE RANGE:")
+        print(f"\nDATE RANGE:")
         print(f"   • From: {complete_df['Date'].min().strftime('%B %Y')}")
         print(f"   • To: {complete_df['Date'].max().strftime('%B %Y')}")
         
-        print(f"\n🌍 BORDERS:")
+        print(f"\nBORDERS:")
         border_counts = complete_df['Border'].value_counts()
         for border, count in border_counts.items():
             print(f"   • {border}: {count:,} records")
         
-        print(f"\n👥 PEOPLE MEASUREMENTS:")
+        print(f"\nPEOPLE MEASUREMENTS:")
         people_measures = people_df['Measure'].value_counts()
         for measure, count in people_measures.items():
             print(f"   • {measure}: {count:,} records")
             
-        print(f"\n🚗 VEHICLE MEASUREMENTS:")
+        print(f"\nVEHICLE MEASUREMENTS:")
         vehicle_measures = vehicles_df['Measure'].value_counts()
         for measure, count in vehicle_measures.items():
             print(f"   • {measure}: {count:,} records")
         
-        print(f"\n📁 OUTPUT FILES CREATED:")
+        print(f"\nOUTPUT FILES CREATED:")
         print(f"   • border_crossings_people.csv")
         print(f"   • border_crossings_vehicles.csv") 
         print(f"   • border_crossings_clean.csv")
         
-        print(f"\n✅ Ready for analysis!")
+        print(f"\nReady for analysis!")
         
     except Exception as e:
-        print(f"\n❌ ERROR: {str(e)}")
+        print(f"\nERROR: {str(e)}")
         logger.error(f"Main function failed: {str(e)}")
         return 1
     
